@@ -7,15 +7,21 @@ export default function App() {
   const [mensajeContador, setMensajeContador] = useState(
     'Esperando un cambio en el contador...'
   );
+
+  // Este ref no representa una vista, sino una pista de depuracion:
+  // cuenta cuantas veces React ha renderizado el componente para comparar
+  // el comportamiento de cada efecto con los ciclos de vida reales de la UI.
   const renderCount = useRef(0);
   renderCount.current += 1;
 
   /*
    * useEffect sin arreglo de dependencias:
-   * Se ejecuta despues de cada render, porque no tiene un segundo argumento
-   * que limite cuando debe correr. Se recomienda para sincronizaciones o
-   * registros que realmente necesiten reaccionar a cualquier actualizacion
-   * del componente; debe evitarse cambiar estado aqui para no crear bucles.
+   * React lo ejecuta despues de cada render, porque al no indicar una
+   * lista de dependencias, el efecto se vuelve a disparar con cualquier
+   * cambio del componente. Esto es util para tareas que deben vigilar todo
+   * el estado del componente, como registrar eventos o sincronizar con un
+   * servicio externo, pero no es recomendable para actualizar estado local
+   * dentro del mismo efecto porque puede crear un bucle infinito de render.
    */
   useEffect(() => {
     console.log(`useEffect sin dependencias: render #${renderCount.current}`);
@@ -23,10 +29,12 @@ export default function App() {
 
   /*
    * useEffect con arreglo de dependencias [contador]:
-   * Se ejecuta despues del montaje y cada vez que cambia contador. Se
-   * recomienda para reaccionar a una variable concreta, por ejemplo para
-   * guardar su valor, consultar datos relacionados o sincronizar una vista.
-   * Un arreglo vacio [] significa que el efecto corre solo una vez al montar.
+   * Aqui definimos una dependencia concreta: el efecto solo se ejecuta despues
+   * del montaje inicial y cuando contador cambia. Este patron es ideal cuando
+   * queremos reaccionar a un valor especifico, como consultar datos, guardar el
+   * estado en almacenamiento o actualizar texto derivado de una variable.
+   * Si el arreglo estuviera vacio, [] , el efecto correria solo una vez al
+   * montar el componente y no volveria a dispararse por cambios de contador.
    */
   useEffect(() => {
     const mensaje = `El contador cambio a ${contador}`;
